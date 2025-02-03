@@ -1,0 +1,1 @@
+place the "bin", "headers", and "lib" folders for openvr in the openvr folder
