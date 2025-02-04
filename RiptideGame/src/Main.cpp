@@ -3,7 +3,7 @@
 #include "RenderDevice.h"
 #include "DeviceContext.h"
 #include "EngineFactoryD3D11.h"
-#include "C:\Users\Blue\RiptideVR\build\Win64\RiptideGame\OpenVRInterface.h"
+#include "OpenVRInterface.h"
 
 using namespace Diligent;
 
@@ -29,10 +29,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
     RegisterClass(&wc);
 
     // create hidden window
-    HWND hwnd = CreateWindowEx(0, L"VRWindowClass", L"", WS_OVERLAPPEDWINDOW,
+    HWND hwnd = CreateWindowEx(0, L"VRWindowClass", L"SIGMA", WS_OVERLAPPEDWINDOW,
                                CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
                                nullptr, nullptr, hInstance, nullptr);
-    ShowWindow(hwnd, SW_HIDE);
+    ShowWindow(hwnd, SW_SHOW);
 
     try
     {
