@@ -126,9 +126,8 @@ void OpenVRInterface::CreateCubeResources()
     PSOCreateInfo.pPS = pPS;
 
     // resource layout
-    ShaderResourceVariableDesc Variables[] =
-        {
-            {SHADER_TYPE_VERTEX, "Constants", SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE}};
+    ShaderResourceVariableDesc Variables[] = {
+        {SHADER_TYPE_VERTEX | SHADER_TYPE_PIXEL, "Constants", SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE}};
     PSOCreateInfo.PSODesc.ResourceLayout.Variables    = Variables;
     PSOCreateInfo.PSODesc.ResourceLayout.NumVariables = _countof(Variables);
 
@@ -172,32 +171,33 @@ void OpenVRInterface::RenderEye(vr::EVREye eye)
     const int eyeIdx = (eye == vr::Eye_Left) ? 0 : 1;
     auto      pRTV   = m_EyeTargets[eyeIdx].Color->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET);
     auto      pDSV   = m_EyeTargets[eyeIdx].Depth->GetDefaultView(TEXTURE_VIEW_DEPTH_STENCIL);
-
     m_pImmediateContext->SetRenderTargets(1, &pRTV, pDSV, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    const float clearColor[] = {0.17f, 0.17f, 0.17f, 1.0f};
+    const float clearColor[] = {
+        eye == vr::Eye_Left ? 1.f : 0.17f,
+        eye == vr::Eye_Left ? 0.17f : 1.f,
+        eye == vr::Eye_Left ? 0.17f : 0.17f,
+        1.0f};
     m_pImmediateContext->ClearRenderTarget(pRTV, clearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-    // Get eye matrices
-    auto     eyeToHead     = m_pHMD->GetEyeToHeadTransform(eye);
-    float4x4 matEyeToHead  = ConvertSteamVRMatrix(eyeToHead);
-    float4x4 matProjection = ConvertProjectionMatrix(m_pHMD->GetProjectionMatrix(eye, 0.025f, 1000.0f));
+    //// Get eye matrices
+    // auto     eyeToHead     = m_pHMD->GetEyeToHeadTransform(eye);
+    //float4x4 matEyeToHead  = ConvertSteamVRMatrix(eyeToHead);
+    //float4x4 matProjection = ConvertProjectionMatrix(m_pHMD->GetProjectionMatrix(eye, 0.025f, 1000.0f));
 
-    // Correct view matrix: headPose * eyeOffset^-1
-    float4x4 matView = m_HMDMatrix.Inverse() * matEyeToHead.Inverse();
-
+    auto MVP = GetCurrentViewProjectionMatrix(eye, m_pHMD, m_HMDMatrix);
     // Render controllers
-    RenderController(m_LeftControllerMatrix * matView, matProjection);
-    RenderController(m_RightControllerMatrix * matView, matProjection);
+    RenderController(m_LeftControllerMatrix * MVP);
+    RenderController(m_RightControllerMatrix * MVP);
 }
 
-void OpenVRInterface::RenderController(const float4x4& controllerMatrix, const float4x4& projectionMatrix)
+void OpenVRInterface::RenderController(const float4x4& matrix)
 {
     ModelConstants constants;
-    constants.WorldViewProj   = controllerMatrix * projectionMatrix;
-    constants.NormalTransform = controllerMatrix.Inverse().Transpose();
-    constants.Color           = float4(0.2f, 0.8f, 0.2f, 1.0f); // Green color
+    constants.WorldViewProj   = matrix;
+    constants.NormalTransform = matrix;
+    constants.Color           = float4(0.f, 0.f, 0.f, 1.0f);
 
     {
         MapHelper<ModelConstants> CBConstants(m_pImmediateContext, m_Constants, MAP_WRITE, MAP_FLAG_DISCARD);
@@ -209,6 +209,7 @@ void OpenVRInterface::RenderController(const float4x4& controllerMatrix, const f
     m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
     m_pImmediateContext->SetPipelineState(m_PSO);
+    m_SRB->GetVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_Constants);
     m_pImmediateContext->CommitShaderResources(m_SRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
     DrawIndexedAttribs drawAttrs{36, VT_UINT32, DRAW_FLAG_VERIFY_ALL};
@@ -221,19 +222,17 @@ void OpenVRInterface::RenderModel(const float4x4& modelMat, const float4x4& view
     constants.WorldViewProj   = modelMat * viewProj;
     constants.NormalTransform = (modelMat * viewProj).Inverse().Transpose();
     constants.Color           = float4(0.5f, 0.8f, 0.3f, 1.0f);
-
     {
         MapHelper<ModelConstants> CBConstants(m_pImmediateContext, m_Constants, MAP_WRITE, MAP_FLAG_DISCARD);
         *CBConstants = constants;
     }
-
     IBuffer* pVBs[] = {m_CubeVertexBuffer};
     m_pImmediateContext->SetVertexBuffers(0, 1, pVBs, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
     m_pImmediateContext->SetIndexBuffer(m_CubeIndexBuffer, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
     m_pImmediateContext->SetPipelineState(m_PSO);
+    m_SRB->GetVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_Constants);
     m_pImmediateContext->CommitShaderResources(m_SRB, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
+    
     DrawIndexedAttribs drawAttrs{36, VT_UINT32, DRAW_FLAG_VERIFY_ALL};
     m_pImmediateContext->DrawIndexed(drawAttrs);
 }
@@ -251,21 +250,56 @@ void OpenVRInterface::SubmitTextures()
         vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &tex[eye]);
     }
 }
+
 float4x4 OpenVRInterface::ConvertSteamVRMatrix(const vr::HmdMatrix34_t& mat)
 {
     return float4x4(
-        mat.m[0][0], mat.m[1][0], mat.m[2][0], 0.0f,
-        mat.m[0][1], mat.m[1][1], mat.m[2][1], 0.0f,
-        mat.m[0][2], mat.m[1][2], mat.m[2][2], 0.0f,
-        mat.m[0][3], mat.m[1][3], mat.m[2][3], 1.0f);
+        mat.m[0][0], mat.m[1][0], -mat.m[2][0], 0.0,
+        mat.m[0][1], mat.m[1][1], -mat.m[2][1], 0.0,
+        mat.m[0][2], mat.m[1][2], -mat.m[2][2], 0.0,
+        mat.m[0][3], mat.m[1][3], -mat.m[2][3], 1.0f); // flip z-axis
 }
 
+float4x4 GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye, vr::IVRSystem* m_pHMD)
+{
+    if (!m_pHMD)
+        return float4x4();
+
+    vr::HmdMatrix44_t mat = m_pHMD->GetProjectionMatrix(nEye, 0.025f, 1000.0f);
+
+    // Adjust for left-handed system by flipping Z axis
+    return float4x4(
+        mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
+        mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1],
+        -mat.m[0][2], -mat.m[1][2], -mat.m[2][2], -mat.m[3][2], // Flip Z components
+        mat.m[0][3], mat.m[1][3], mat.m[2][3], mat.m[3][3]);
+}
+
+float4x4 GetHMDMatrixPoseEye(vr::Hmd_Eye nEye, vr::IVRSystem *m_pHMD)
+{
+    if (!m_pHMD)
+        return float4x4();
+
+    vr::HmdMatrix34_t matEyeRight = m_pHMD->GetEyeToHeadTransform(nEye);
+    float4x4          matrixObj(
+        matEyeRight.m[0][0], matEyeRight.m[1][0], matEyeRight.m[2][0], 0.0,
+        matEyeRight.m[0][1], matEyeRight.m[1][1], matEyeRight.m[2][1], 0.0,
+        matEyeRight.m[0][2], matEyeRight.m[1][2], matEyeRight.m[2][2], 0.0,
+        matEyeRight.m[0][3], matEyeRight.m[1][3], matEyeRight.m[2][3], 1.0f);
+
+    return matrixObj;
+}
+
+float4x4 GetCurrentViewProjectionMatrix(vr::Hmd_Eye nEye, vr::IVRSystem* m_pHMD, float4x4 m_HMDMatrix)
+{
+    return GetHMDMatrixProjectionEye(nEye, m_pHMD) * GetHMDMatrixPoseEye(nEye, m_pHMD) * m_HMDMatrix.Inverse();
+}
 
 float4x4 OpenVRInterface::ConvertProjectionMatrix(const vr::HmdMatrix44_t& mat)
 {
     return float4x4(
-        mat.m[0][0], mat.m[1][0], mat.m[2][0], mat.m[3][0],
-        mat.m[0][1], mat.m[1][1], mat.m[2][1], mat.m[3][1],
-        mat.m[0][2], mat.m[1][2], mat.m[2][2], mat.m[3][2],
-        mat.m[0][3], mat.m[1][3], mat.m[2][3], mat.m[3][3]);
+        mat.m[0][0], mat.m[0][1], mat.m[0][2], mat.m[0][3],
+        mat.m[1][0], mat.m[1][1], mat.m[1][2], mat.m[1][3],
+        mat.m[2][0], mat.m[2][1], mat.m[2][2], mat.m[2][3],
+        mat.m[3][0], mat.m[3][1], mat.m[3][2], mat.m[3][3]);
 }

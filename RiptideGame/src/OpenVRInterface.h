@@ -11,6 +11,10 @@
 
 using namespace Diligent;
 
+float4x4 GetCurrentViewProjectionMatrix(vr::Hmd_Eye nEye, vr::IVRSystem* m_pHMD, float4x4 m_HMDMatrix);
+float4x4 GetHMDMatrixPoseEye(vr::Hmd_Eye nEye, vr::IVRSystem* m_pHMD);
+float4x4 GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye, vr::IVRSystem* m_pHMD);
+
 class OpenVRInterface
 {
 public:
@@ -61,7 +65,7 @@ private:
 
     void RenderEye(vr::EVREye eye);
 
-    void RenderController(const float4x4& controllerMatrix, const float4x4& projectionMatrix);
+    void RenderController(const float4x4& matrix);
 
     void RenderModel(const float4x4& modelMat, const float4x4& viewProj);
 
@@ -108,14 +112,13 @@ struct PSInput
 
 cbuffer Constants
 {
+    float4x4 WorldViewProj;
+    float4x4 NormalTransform;
     float4 Color;
 };
-
 float4 main(in PSInput PSIn) : SV_TARGET
 {
-    float3 lightDir = normalize(float3(0.5, -1.0, 0.25));
-    float NdL = max(dot(normalize(PSIn.Norm), -lightDir), 0.1);
-    return float4(Color.rgb * NdL, Color.a);
+    return float4(Color.rgb, 1.f);
 }
 )";
 };

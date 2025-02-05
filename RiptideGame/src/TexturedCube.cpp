@@ -52,7 +52,7 @@ RefCntAutoPtr<IBuffer> CreateVertexBuffer(IRenderDevice*                  pDevic
     RefCntAutoPtr<IBuffer> pVertices;
     CreateGeometryPrimitiveBuffers(
         pDevice,
-        CubeGeometryPrimitiveAttributes{1.f, Components},
+        CubeGeometryPrimitiveAttributes{2.f, Components},
         &CubeBuffersCI,
         &pVertices,
         nullptr,

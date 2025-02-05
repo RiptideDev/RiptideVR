@@ -21,6 +21,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
+    AllocConsole();
+    freopen("CONOUT$", "w", stdout);
     // register window class
     WNDCLASS wc      = {};
     wc.lpfnWndProc   = WindowProc;
@@ -30,7 +32,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 
     // create hidden window
     HWND hwnd = CreateWindowEx(0, L"VRWindowClass", L"SIGMA", WS_OVERLAPPEDWINDOW,
-                               CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
+                               CW_USEDEFAULT, CW_USEDEFAULT, 256, 256,
                                nullptr, nullptr, hInstance, nullptr);
     ShowWindow(hwnd, SW_SHOW);
 
@@ -84,6 +86,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
     }
 
     // cleanup
+    FreeConsole();
     DestroyWindow(hwnd);
     UnregisterClass(L"VRWindowClass", hInstance);
     return 0;
