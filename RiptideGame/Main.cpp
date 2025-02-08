@@ -3,10 +3,15 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Riptide.h"
+
+
 #include "RenderInstance.h"
 #include "Instance.h"
+#include "Shader.h"
+#include "Universe.h"
+#include "Mesh.h"
 
-float deltaTime;
+float deltaTime = 0;
 
 void GLFW_error_callback(int error, const char* description)
 {
@@ -26,6 +31,8 @@ void ApplicationExit()
     glDeleteTextures(1, (const GLuint*)&(Riptide::Context->right_eye_color));
     glDeleteTextures(1, (const GLuint*)&(Riptide::Context->right_eye_depth));
     glDeleteFramebuffers(1, (const GLuint*)&(Riptide::Context->right_eye_viewport));
+
+    Riptide::Universe->Destroy();
 
     Riptide::VRInterface->Shutdown();
     glfwDestroyWindow(Riptide::Context->window);
@@ -109,7 +116,7 @@ void DrawEye(int eye) {
     auto view = Riptide::VRInterface->GetEyeViewMatrix(vreye);
     auto proj = Riptide::VRInterface->GetProjectionMatrix(vreye, 0.1f, 1000.0f);
 
-    for (Instance* inst : Instance::Everything)
+    for (Instance* inst : Riptide::Universe->Workspace->GetChildren())
     {
         if (dynamic_cast<RenderInstance*>(inst))
         {
@@ -197,8 +204,72 @@ int main()
 
     CreateEyeFramebuffer(vr::Eye_Left);
     CreateEyeFramebuffer(vr::Eye_Right);
-    float currentFrame;
-    float lastFrame;
+    float currentFrame = 0;
+    float lastFrame = 0;
+
+    auto univ = new Universe();
+    univ->Name = "Universe";
+
+    auto workspace = new Instance();
+    workspace->Name = "Workspace";
+    workspace->SetParent(univ);
+    univ->Workspace = workspace;
+
+    auto lighting = new Instance();
+    lighting->Name = "Lighting";
+    lighting->SetParent(univ);
+    univ->Lighting = lighting;
+
+    auto genericShader = new Shader();
+    genericShader->Name = "test";
+    genericShader->FragmentCode = R"(
+#version 440 core
+out vec4 FragColor;
+
+in vec3 vertexColor;
+
+void main()
+{
+    FragColor = vec4(vertexColor, 1.0f);
+}
+    )";
+    genericShader->VertexCode = R"(
+#version 440 core
+layout (location = 0) in vec3 aPos; 
+layout (location = 1) in vec3 aCol; 
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out vec3 vertexColor;
+
+void main()
+{
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    vertexColor = aCol;
+}
+)";
+    genericShader->Compile();
+    genericShader->SetParent(lighting);
+
+    Riptide::Universe = univ;
+
+    auto mesh = new Mesh();
+    float vertices[] = {
+        // Position      // Color
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+    };
+    int indices[] = { 0, 1, 2 };
+    mesh->Upload(vertices, 18, indices, 3);
+    mesh->Name = "SillyMesh";
+    mesh->Shader = genericShader;
+    mesh->SetParent(Riptide::Universe->Workspace);
+
+    Riptide::Universe->PrintTree();
+
     while (!glfwWindowShouldClose(ctx->window))
     {
         currentFrame = glfwGetTime();
@@ -206,7 +277,7 @@ int main()
         lastFrame = currentFrame;
         Riptide::VRInterface->UpdateTracking();
 
-        for (Instance* inst : Instance::Everything)
+        for (Instance* inst : Instance::GetAllInstances())
         {
             inst->Update(deltaTime);
         }

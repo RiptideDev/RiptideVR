@@ -31,6 +31,15 @@
     <Filter Include="Source Files\openvr">
       <UniqueIdentifier>{c6e64141-ff96-454d-a0e7-9d539006fe78}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\instances">
+      <UniqueIdentifier>{e1582c67-20f6-4b2d-86c6-1ebe35f650de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instances">
+      <UniqueIdentifier>{480186ed-eac1-47ab-a404-5d246e6667f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\misc">
+      <UniqueIdentifier>{b8755fca-3077-4ad6-8f87-6f1424a44f9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,6 +57,18 @@
     <ClCompile Include="OpenVRInterface.cpp">
       <Filter>Source Files\openvr</Filter>
     </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Source Files\instances</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderInstance.cpp">
+      <Filter>Source Files\instances</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files\instances</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files\instances</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Riptide.h">
@@ -61,6 +82,24 @@
     </ClInclude>
     <ClInclude Include="OpenVRInterface.h">
       <Filter>Header Files\openvr</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderInstance.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="types.h">
+      <Filter>Header Files\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="Universe.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\instances</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

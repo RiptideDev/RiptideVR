@@ -1,6 +1,7 @@
 #pragma once
 #include "GLFW/glfw3.h"
 #include "OpenVRInterface.h"
+#include "Universe.h"
 
 struct R_Context
 {
@@ -18,4 +19,5 @@ static class Riptide
 public:
 	static R_Context* Context;
 	static OpenVRInterface* VRInterface;
+	static Universe* Universe;
 };
