@@ -287,10 +287,15 @@ void main()
         glEnable(GL_DEPTH_TEST);
         DrawEye(1);
         
-
         glBindFramebuffer(GL_FRAMEBUFFER, Riptide::Context->right_eye_viewport);
         glViewport(0, 0, Riptide::Context->eye_width, Riptide::Context->eye_height);
         DrawEye(2);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        int width, height;
+        glfwGetFramebufferSize(Riptide::Context->window, &width, &height);
+        glViewport(0, 0, width, height);
+        DrawEye(0);
         glDisable(GL_DEPTH_TEST);
 
 
