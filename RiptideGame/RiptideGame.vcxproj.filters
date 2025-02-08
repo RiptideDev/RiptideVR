@@ -13,10 +13,39 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\static">
+      <UniqueIdentifier>{a665422a-dec0-4c58-a20a-c1955a9f5e77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\static">
+      <UniqueIdentifier>{e2c8d156-d749-44b6-b720-8c21b04fb0eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\misc">
+      <UniqueIdentifier>{767a5cec-a06f-48f2-9591-3e961de2910d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RiptideGame.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Riptide.cpp">
+      <Filter>Source Files\static</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Linker.cpp">
+      <Filter>Source Files\misc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Riptide.h">
+      <Filter>Header Files\static</Filter>
+    </ClInclude>
+    <ClInclude Include="glad.h">
+      <Filter>Header Files\static</Filter>
+    </ClInclude>
+    <ClInclude Include="khrplatform.h">
+      <Filter>Header Files\static</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
