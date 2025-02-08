@@ -1,7 +1,0 @@
-build
-out
-.vs
-/thirdparty/openvr
-/.idea
-/cmake-build-debug
-/cmake-build-debug
