@@ -22,6 +22,15 @@
     <Filter Include="Source Files\misc">
       <UniqueIdentifier>{767a5cec-a06f-48f2-9591-3e961de2910d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\glad">
+      <UniqueIdentifier>{02db51df-28eb-4409-8be0-3f9fbdc44adb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\openvr">
+      <UniqueIdentifier>{b6152ba3-ece3-498c-957e-5cf8c1cfa23f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\openvr">
+      <UniqueIdentifier>{c6e64141-ff96-454d-a0e7-9d539006fe78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -36,16 +45,22 @@
     <ClCompile Include="Linker.cpp">
       <Filter>Source Files\misc</Filter>
     </ClCompile>
+    <ClCompile Include="OpenVRInterface.cpp">
+      <Filter>Source Files\openvr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Riptide.h">
       <Filter>Header Files\static</Filter>
     </ClInclude>
     <ClInclude Include="glad.h">
-      <Filter>Header Files\static</Filter>
+      <Filter>Header Files\glad</Filter>
     </ClInclude>
     <ClInclude Include="khrplatform.h">
-      <Filter>Header Files\static</Filter>
+      <Filter>Header Files\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenVRInterface.h">
+      <Filter>Header Files\openvr</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

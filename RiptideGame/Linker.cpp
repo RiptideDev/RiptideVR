@@ -3,3 +3,4 @@
 
 #pragma comment(lib, "glfw3.lib")
 #pragma comment(lib, "glfw3dll.lib")
+#pragma comment(lib, "openvr_api.lib")
