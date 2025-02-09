@@ -40,6 +40,7 @@ void ApplicationExit()
     
     delete Riptide::VRInterface;
     delete Riptide::Context;
+    delete Riptide::Cloud;
     Closed = true;
 }
 
@@ -201,6 +202,7 @@ int main()
     
     Riptide::VRInterface = VRInterface;
     Riptide::Context = ctx;
+    Riptide::Cloud = new CloudManager();
 
     CreateEyeFramebuffer(vr::Eye_Left);
     CreateEyeFramebuffer(vr::Eye_Right);

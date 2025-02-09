@@ -44,6 +44,9 @@ void Mesh::SetupBuffers(float* vertexData, int vertexCount, int* indexData, int 
 }
 
 void Mesh::Destroy() {
+    if (IsDestroyed()) return;
+    RenderInstance::Destroy();
+
     if (VAO) glDeleteVertexArrays(1, &VAO);
     if (VBO) glDeleteBuffers(1, &VBO);
     if (EBO) glDeleteBuffers(1, &EBO);
@@ -54,21 +57,17 @@ void Mesh::Destroy() {
 
 void Mesh::Draw(float dt, glm::mat4 view, glm::mat4 proj) {
     if (!Shader || indexCount == 0) {
-        std::cerr << "Mesh::Draw: Missing shader or no indices!\n";
         return;
     }
-    glUseProgram(Shader->GetNative());
-    glm::mat4 model;
-    glm::translate(model, glm::vec3(Position.x, Position.y, Position.z));
-    glm::rotate(model, Rotation.x, glm::vec3(1, 0, 0));
-    glm::rotate(model, Rotation.y, glm::vec3(0, 1, 0));
-    glm::rotate(model, Rotation.z, glm::vec3(0, 0, 1));
 
-    Shader->SetMat4("model", model);
+    glUseProgram(Shader->GetNative());
+
+    Shader->SetMat4("model", GetGlobalMatrix());
     Shader->SetMat4("view", view);
     Shader->SetMat4("projection", proj);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+    glUseProgram(0);
 }

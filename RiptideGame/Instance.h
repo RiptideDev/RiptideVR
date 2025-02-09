@@ -6,11 +6,19 @@
 #include <atomic>
 #include <memory>
 
+enum NetworkType
+{
+    NETWORKTYPE_RELIABLE_DYNAMIC,
+    NETWORKTYPE_RELIABLE_STATIC,
+
+    NETWORKTYPE_UNRELIABLE_DYNAMIC
+};
 
 class Instance {
 public:
     using FactoryFunc = Instance * (*)();
     std::string Name;
+    NetworkType NetworkType = NETWORKTYPE_UNRELIABLE_DYNAMIC;
 
     Instance();
     virtual ~Instance();
@@ -29,12 +37,20 @@ public:
 
     virtual void Update(float dt) {}
     std::vector<Instance*> GetChildren();
+
+    // network
+    virtual char* GetNetworkPacket(float dt);
+    virtual void ApplyNetworkPacket(float dt, char* packet);
+    int GetNetworkOwner();
+
+    // static members
     static const std::vector<Instance*>& GetAllInstances();
     static Instance* Create(std::string classname);
     static void RegisterInstanceClass(std::string classname, FactoryFunc);
     static void RegisterInstanceClasses();
 
 private:
+    int m_net_owner = 0;
     int m_id;
     bool m_destroyed = false;
     Instance* m_parent = nullptr;

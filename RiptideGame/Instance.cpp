@@ -64,13 +64,12 @@ void Instance::UpdateChildLookup(Instance* child, bool add) {
 void Instance::Destroy() {
     if (m_destroyed) return;
     m_destroyed = true;
+    RemoveFromParent();
 
     // Destroy children first
     while (!m_children.empty()) {
         m_children.back()->Destroy();
     }
-
-    RemoveFromParent();
 }
 
 // Debugging
@@ -86,6 +85,15 @@ void Instance::PrintTree(int indentation) const {
 std::vector<Instance*> Instance::GetChildren()
 {
     return m_children;
+}
+
+char* Instance::GetNetworkPacket(float dt)
+{
+    return nullptr;
+}
+
+void Instance::ApplyNetworkPacket(float dt, char* packet)
+{
 }
 
 // Static instance management
@@ -113,4 +121,9 @@ void Instance::RegisterInstanceClasses()
     RegisterInstanceClass("Instance", static_cast<FactoryFunc>([]() -> Instance* {
         return new Instance();
     }));
+}
+
+int Instance::GetNetworkOwner()
+{
+    return m_net_owner;
 }

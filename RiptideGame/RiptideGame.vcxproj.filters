@@ -69,6 +69,18 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Source Files\instances</Filter>
     </ClCompile>
+    <ClCompile Include="Cloud.cpp">
+      <Filter>Source Files\static</Filter>
+    </ClCompile>
+    <ClCompile Include="AssetSystem.cpp">
+      <Filter>Source Files\static</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformInstance.cpp">
+      <Filter>Source Files\instances</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackedTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Riptide.h">
@@ -99,6 +111,18 @@
       <Filter>Header Files\instances</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="Cloud.h">
+      <Filter>Header Files\static</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetSystem.h">
+      <Filter>Header Files\static</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformInstance.h">
+      <Filter>Header Files\instances</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackedTransform.h">
       <Filter>Header Files\instances</Filter>
     </ClInclude>
   </ItemGroup>

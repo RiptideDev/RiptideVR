@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AssetSystem.cpp" />
+    <ClCompile Include="Cloud.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Linker.cpp" />
@@ -160,8 +162,12 @@
     <ClCompile Include="Riptide.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="TrackedTransform.cpp" />
+    <ClCompile Include="TransformInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AssetSystem.h" />
+    <ClInclude Include="Cloud.h" />
     <ClInclude Include="glad.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="khrplatform.h" />
@@ -170,6 +176,8 @@
     <ClInclude Include="RenderInstance.h" />
     <ClInclude Include="Riptide.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="TrackedTransform.h" />
+    <ClInclude Include="TransformInstance.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="Universe.h" />
   </ItemGroup>

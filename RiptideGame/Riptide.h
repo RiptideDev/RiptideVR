@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "OpenVRInterface.h"
 #include "Universe.h"
+#include "Cloud.h"
 
 struct R_Context
 {
@@ -17,7 +18,8 @@ struct R_Context
 static class Riptide
 {
 public:
-	static R_Context* Context;
-	static OpenVRInterface* VRInterface;
-	static Universe* Universe;
+	static R_Context*			Context;
+	static OpenVRInterface*		VRInterface;
+	static Universe*			Universe;
+	static CloudManager*		Cloud;
 };
