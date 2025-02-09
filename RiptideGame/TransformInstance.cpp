@@ -44,7 +44,7 @@ char* TransformInstance::GetNetworkPacket(float dt)
 	return (char*)(&inst);
 }
 
-void TransformInstance::ApplyNetworkPacket(float dt, char *packet)
+void TransformInstance::ApplyNetworkPacket(float dt, const char* packet)
 {
 	auto Packet = (TransformInstanceNetworkPacket*)packet;
 	ModelMatrix = Packet->ModelMatrix;

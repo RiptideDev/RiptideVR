@@ -9,15 +9,16 @@ void Mesh::Upload(float* vertexData, int vertexCount, int* indexData, int indexC
         return;
     }
 
-    // Clear existing buffers
-    Destroy();
+    if (VAO) glDeleteVertexArrays(1, &VAO);
+    if (VBO) glDeleteBuffers(1, &VBO);
+    if (EBO) glDeleteBuffers(1, &EBO);
 
     // Generate new buffers
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    this->indexCount = indexCount; // Properly store index count
+    this->indexCount = indexCount;
     SetupBuffers(vertexData, vertexCount, indexData, indexCount);
 }
 
@@ -62,12 +63,16 @@ void Mesh::Draw(float dt, glm::mat4 view, glm::mat4 proj) {
 
     glUseProgram(Shader->GetNative());
 
-    Shader->SetMat4("model", GetGlobalMatrix());
+    Shader->SetMat4("model", {});
     Shader->SetMat4("view", view);
     Shader->SetMat4("projection", proj);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    glUseProgram(0);
+    // glUseProgram(0);
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << "OpenGL error: " << err << std::endl;
+    }
 }

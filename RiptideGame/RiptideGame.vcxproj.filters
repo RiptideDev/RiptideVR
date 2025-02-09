@@ -79,7 +79,7 @@
       <Filter>Source Files\instances</Filter>
     </ClCompile>
     <ClCompile Include="TrackedTransform.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\instances</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

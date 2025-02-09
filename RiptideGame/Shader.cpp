@@ -2,6 +2,8 @@
 #include "glad.h"
 #include <glm/matrix.hpp>
 
+#include "vcruntime_exception.h"
+
 GLuint CompileShader(const std::string& source, GLenum type) {
     GLuint shader = glCreateShader(type);
     const char* src = source.c_str();

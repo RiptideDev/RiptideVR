@@ -22,7 +22,7 @@ public:
 	glm::mat4 GetGlobalMatrix();
 
 	char* GetNetworkPacket(float dt) override;
-	void ApplyNetworkPacket(float dt, char* packet) override;
+	void ApplyNetworkPacket(float dt, const char* packet) override;
 
 	std::string GetClassName() const override { return "TransformInstance"; }
 private:

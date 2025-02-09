@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Universe.h"
 #include "Mesh.h"
+#include "TrackedTransform.h"
 
 float deltaTime = 0;
 
@@ -102,7 +103,7 @@ void CreateEyeFramebuffer(vr::Hmd_Eye eye)
 
 // 0=window 1=left 2=right
 void DrawEye(int eye) {
-    glClearColor(0, 0, 0, 1);
+    glClearColor(1, 0, 0, 1);
     vr::Hmd_Eye vreye = vr::Eye_Left;
     switch (eye) {
     case 1:
@@ -116,60 +117,16 @@ void DrawEye(int eye) {
     auto pose = glm::inverse(Riptide::VRInterface->GetHMDPoseMatrix());
     auto view = Riptide::VRInterface->GetEyeViewMatrix(vreye);
     auto proj = Riptide::VRInterface->GetProjectionMatrix(vreye, 0.1f, 1000.0f);
+    auto vp = view * pose;
 
-    for (Instance* inst : Riptide::Universe->Workspace->GetChildren())
+    for (Instance* inst : Instance::GetAllInstances())
     {
         if (dynamic_cast<RenderInstance*>(inst))
         {
-            ((RenderInstance*)inst)->Draw(deltaTime, view * pose, proj);
+            ((RenderInstance*)inst)->Draw(deltaTime, vp, proj);
         }
         // inst->Update(deltaTime);
     }
-
-    //glPushMatrix();
-
-    //glMatrixMode(GL_PROJECTION);
-    //glLoadMatrixf(glm::value_ptr(Riptide::VRInterface->GetProjectionMatrix(vreye, 0.1f, 1000.0f)));
-
-    //glMatrixMode(GL_MODELVIEW);
-    //glLoadIdentity();
-
-    //auto viewMatrix = Riptide::VRInterface->GetEyeViewMatrix(vreye);
-    //glMultMatrixf(glm::value_ptr(viewMatrix));
-
-    //auto pose = glm::inverse(Riptide::VRInterface->GetHMDPoseMatrix());
-    //glMultMatrixf(glm::value_ptr(pose));
-
-    //auto right_ctrl = Riptide::VRInterface->GetControllerPoseMatrix(vr::TrackedControllerRole_RightHand);
-    //auto left_ctrl = Riptide::VRInterface->GetControllerPoseMatrix(vr::TrackedControllerRole_LeftHand);
-    //glPushMatrix();
-    //glMultMatrixf(glm::value_ptr(right_ctrl));
-
-    //// Draw a triangle
-    //glBegin(GL_TRIANGLES);
-    //glColor3f(  1,  0,      0);
-    //glVertex3f(-0.25f, -0.25f,  0);
-    //glColor3f(  0,      1,  0);
-    //glVertex3f( 0.25f, -0.25f,  0);
-    //glColor3f(  0,      0,      1);
-    //glVertex3f( 0,      0.25f,  0);
-    //glEnd();
-
-    //glPopMatrix();
-    //glPushMatrix();
-    //glMultMatrixf(glm::value_ptr(left_ctrl));
-
-    //// Draw a triangle
-    //glBegin(GL_TRIANGLES);
-    //glColor3f(1, 0, 0);
-    //glVertex3f(-0.25f, -0.25f, 0);
-    //glColor3f(0, 1, 0);
-    //glVertex3f(0.25f, -0.25f, 0);
-    //glColor3f(0, 0, 1);
-    //glVertex3f(0, 0.25f, 0);
-    //glEnd();
-    //glPopMatrix();
-    //glPopMatrix();
 }
 
 int main()
@@ -210,20 +167,20 @@ int main()
     float lastFrame = 0;
 
     auto univ = new Universe();
-    univ->Name = "Universe";
+    univ->SetName("Universe");
 
     auto workspace = new Instance();
-    workspace->Name = "Workspace";
+    workspace->SetName("Workspace");
     workspace->SetParent(univ);
     univ->Workspace = workspace;
 
     auto lighting = new Instance();
-    lighting->Name = "Lighting";
+    lighting->SetName("Lighting");
     lighting->SetParent(univ);
     univ->Lighting = lighting;
 
     auto genericShader = new Shader();
-    genericShader->Name = "test";
+    genericShader->SetName("test");
     genericShader->FragmentCode = R"(
 #version 440 core
 out vec4 FragColor;
@@ -232,7 +189,7 @@ in vec3 vertexColor;
 
 void main()
 {
-    FragColor = vec4(vertexColor, 1.0f);
+    FragColor = vec4(1, 1, 1, 1.0f);
 }
     )";
     genericShader->VertexCode = R"(
@@ -257,20 +214,50 @@ void main()
 
     Riptide::Universe = univ;
 
-    auto mesh = new Mesh();
-    float vertices[] = {
-        // Position      // Color
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-         0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+    auto leftctrl = new TrackedTransform();
+    leftctrl->SetName("LeftController");
+    leftctrl->PoseRole = TRACKEDPOSEROLE_LEFT_CONTROLLER;
+
+    auto rightctrl = new TrackedTransform();
+    rightctrl->SetName("RightController");
+    rightctrl->PoseRole = TRACKEDPOSEROLE_RIGHT_CONTROLLER;
+
+    rightctrl->SetParent(workspace);
+    leftctrl->SetParent(workspace);
+
+    float cube[] = {
+        -1.f,     -1.f,     0.f,      1.f, 0.f, 0.f,
+         1.f,     -1.f,     0.f,      1.f, 0.f, 0.f,
+         0.f,     0.f,      0.f,      1.f, 0.f, 0.f,
     };
-    int indices[] = { 0, 1, 2 };
-    mesh->Upload(vertices, 18, indices, 3);
-    mesh->Name = "SillyMesh";
-    mesh->Shader = genericShader;
-    mesh->SetParent(Riptide::Universe->Workspace);
+
+    int idxs[] = {
+        0, 1, 2
+    };
+
+    auto cubee = new Mesh();
+    cubee->Shader = genericShader;
+    cubee->Upload(cube, 18, idxs, 3);
+    cubee->SetName("SigmaCube");
+
+    cubee->SetParent(workspace);
+
+    //auto left = new Mesh();
+    //auto right = new Mesh();
+    //left->Upload(cube, 48, idxs, 36);
+    //left->SetName("LeftControllerMesh");
+    //left->Shader = genericShader;
+
+    //right->Upload(cube, 48, idxs, 36);
+    //right->SetName("RightControllerMesh");
+    //right->Shader = genericShader;
+
+    //left->SetParent(leftctrl);
+    //right->SetParent(rightctrl);
 
     Riptide::Universe->PrintTree();
+
+    glDisable(GL_CULL_FACE);
 
     while (!glfwWindowShouldClose(ctx->window))
     {
@@ -283,21 +270,22 @@ void main()
         {
             inst->Update(deltaTime);
         }
+        glEnable(GL_DEPTH_TEST);
 
         glBindFramebuffer(GL_FRAMEBUFFER, Riptide::Context->left_eye_viewport);
         glViewport(0, 0, Riptide::Context->eye_width, Riptide::Context->eye_height);
-        glEnable(GL_DEPTH_TEST);
         DrawEye(1);
         
         glBindFramebuffer(GL_FRAMEBUFFER, Riptide::Context->right_eye_viewport);
         glViewport(0, 0, Riptide::Context->eye_width, Riptide::Context->eye_height);
         DrawEye(2);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        int width, height;
-        glfwGetFramebufferSize(Riptide::Context->window, &width, &height);
-        glViewport(0, 0, width, height);
-        DrawEye(0);
+        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //int width, height;
+        //glfwGetFramebufferSize(Riptide::Context->window, &width, &height);
+        //glViewport(0, 0, width, height);
+        //DrawEye(0);
+
         glDisable(GL_DEPTH_TEST);
 
 

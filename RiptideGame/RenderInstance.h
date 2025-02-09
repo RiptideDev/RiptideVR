@@ -8,7 +8,6 @@
 class RenderInstance : public TransformInstance
 {
 public:
-	bool Networked = true;
 	virtual void Draw(float dt, glm::mat4 view, glm::mat4 proj);
 
 	std::string GetClassName() const override { return "RenderInstance"; }
